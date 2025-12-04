@@ -41,9 +41,11 @@ router.post('/orders/create', rawBodyMiddleware, async (req, res) => {
     const orderData = JSON.parse(req.rawBody.toString());
     const shopDomain = req.get('X-Shopify-Shop-Domain');
 
+    // 1. Find the Tenant
     const tenant = await prisma.tenant.findUnique({ where: { shopDomain } });
     if (!tenant) return res.status(404).send('Tenant not found');
 
+    // 2. Sync the Order
     await prisma.order.upsert({
       where: { shopifyOrderId: String(orderData.id) },
       update: {
@@ -59,15 +61,37 @@ router.post('/orders/create', rawBodyMiddleware, async (req, res) => {
       }
     });
 
+    // 3. Sync the Customer (THIS WAS MISSING)
+    // Shopify sends the updated customer stats inside the order payload
+    if (orderData.customer) {
+        await prisma.customer.upsert({
+            where: { shopifyCustomerId: String(orderData.customer.id) },
+            update: {
+                totalSpent: parseFloat(orderData.customer.total_spent || 0),
+                ordersCount: orderData.customer.orders_count || 0, // Updates the count!
+                email: orderData.customer.email
+            },
+            create: {
+                shopifyCustomerId: String(orderData.customer.id),
+                email: orderData.customer.email,
+                totalSpent: parseFloat(orderData.customer.total_spent || 0),
+                ordersCount: orderData.customer.orders_count || 1,
+                tenantId: tenant.id
+            }
+        });
+    }
+
+    // 4. Trigger Frontend Update
     await pusher.trigger('shop-updates', 'order-synced', {
       message: 'New order received',
       orderId: orderData.id
     });
 
+    console.log(`✅ Order & Customer synced for ${shopDomain}`);
     res.status(200).send('Webhook processed');
 
   } catch (error) {
-    console.error(error);
+    console.error('Webhook Error:', error);
     res.status(200).send('Error processed'); 
   }
 });
