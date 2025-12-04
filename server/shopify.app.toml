@@ -1,0 +1,18 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "424bfcd193589e3e1fc344cd38a4a448"
+name = "Ingestion-Insights-Service"
+application_url = "https://17357b79ae97.ngrok-free.app"
+embedded = true
+
+[webhooks]
+api_version = "2026-01"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customers,read_orders,read_products"
+optional_scopes = [ ]
+use_legacy_install_flow = true
+
+[auth]
+redirect_urls = [ "https://17357b79ae97.ngrok-free.app/api/shopify/callback" ]
