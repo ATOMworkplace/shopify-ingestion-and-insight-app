@@ -98,8 +98,19 @@ function DashboardContent() {
   };
 
   const handleConnect = () => {
-    if(!shopUrl) return showToast("Enter shop domain", 'error');
-    const cleanShop = shopUrl.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    if (!shopUrl) return showToast("Enter shop domain", 'error');
+
+    let cleanShop = shopUrl.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    const shopifyRegex = /^[a-zA-Z0-9-]+\.myshopify\.com$/;
+
+    if (!shopifyRegex.test(cleanShop)) {
+        if (/^[a-zA-Z0-9-]+$/.test(cleanShop)) {
+            cleanShop += '.myshopify.com';
+        } else {
+            return showToast("Invalid domain. Use format: store.myshopify.com", 'error');
+        }
+    }
+
     const token = localStorage.getItem('gj_token');
     if (!token) return router.push('/');
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/shopify/install?shop=${cleanShop}&token=${token}`;

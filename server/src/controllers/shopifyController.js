@@ -31,7 +31,11 @@ const install = (req, res) => {
     }
 
     const shop = req.query.shop;
-    if (!shop) return res.status(400).send('Missing shop parameter');
+    const shopRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com$/;
+
+    if (!shop || !shopRegex.test(shop)) {
+        return res.status(400).send('Invalid shop parameter. Must be a valid .myshopify.com domain.');
+    }
 
     const state = req.user.id;
     const redirectUri = REDIRECT_URI || `${APP_URL}/api/shopify/callback`;
