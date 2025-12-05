@@ -3,9 +3,11 @@
 This application is a **Shopify Ingestion and Insight App** designed to synchronize customer, order, and product data from a connected Shopify store to a local database and provide key e-commerce insights.
 
 The project is structured as a full-stack application with separate **server** and **client** directories.
+
+
 ## Architecture Diagram
 
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/2be48d33-491e-4f2c-8aca-db12927bb3d8" />
+![High-level architecture diagram for a full-stack application connecting a Next.js client and a Node.js/Express server to Shopify and a MySQL/Prisma database](https://github.com/user-attachments/assets/2be48d33-491e-4f2c-8aca-db12927bb3d8)
 
 The application follows a **microservice/monorepo pattern** with a separation of concerns between the client and server.
 
@@ -16,11 +18,26 @@ The application follows a **microservice/monorepo pattern** with a separation of
     * **Data Persistence**: Uses **Prisma** to manage the **MySQL** database.
     * **Real-time**: Uses **Pusher** to broadcast webhook events to connected clients.
 
+## Tech Stack Used
+
+This application is built as a full-stack, monorepo solution utilizing modern JavaScript technologies for speed, scalability, and real-time capability.
+
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Frontend** | **Next.js** | Client-side application for UI, routing, and dashboard presentation. |
+| **Backend** | **Node.js** / **Express.js** | Server-side API for authentication, data handling, and webhook processing. |
+| **Database** | **MySQL** | Persistent storage for application tenants, and synchronized Customer, Order, and Product data. |
+| **ORM** | **Prisma** | Database toolkit and ORM used to manage the MySQL schema and interact with data models. |
+| **Real-time** | **Pusher** / **Pusher-js** | Enables real-time event broadcasting from the server to connected clients (e.g., for new order webhooks). |
+| **External API**| **Shopify REST Admin API** | Source of truth for bulk data synchronization and Shopify OAuth. |
+| **Authentication**| **JWT** | Used for user authentication and authorization across API endpoints. |
+
+
 ## Demo and Screenshots:
-<img width="1919" height="931" alt="image" src="https://github.com/user-attachments/assets/5d90954e-0b6f-4045-bed3-c87baf851304" />
-<img width="1919" height="961" alt="image" src="https://github.com/user-attachments/assets/332786db-0dcf-4d74-8b72-a6943e9ef5ce" />
-<img width="1899" height="948" alt="image" src="https://github.com/user-attachments/assets/b44badb4-a85f-4e6d-8bd5-9abbf6ad673d" />
-<img width="1885" height="951" alt="image" src="https://github.com/user-attachments/assets/2d305cad-930a-4505-9225-afc26f2ea02f" />
+![Screenshot of the application dashboard 1](https://github.com/user-attachments/assets/5d90954e-0b6f-4045-bed3-c87baf851304)
+![Screenshot of the application dashboard 2](https://github.com/user-attachments/assets/332786db-0dcf-4d74-8b72-a6943e9ef5ce)
+![Screenshot of the application dashboard 3](https://github.com/user-attachments/assets/b44badb4-a85f-4e6d-8bd5-9abbf6ad673d)
+![Screenshot of the application dashboard 4](https://github.com/user-attachments/assets/2d305cad-930a-4505-9225-afc26f2ea02f)
 
 ## Setup Instructions
 
@@ -51,13 +68,14 @@ The application follows a **microservice/monorepo pattern** with a separation of
     cd client
     npm run dev
     ```
+
 ## Technical Overview and Documentation Summary
 
 This section fulfills the documentation requirements by summarizing the core components, assumptions, and future steps.
 
-### Note
+### Assumptions you made.
 * **Authentication/Authorization**: The application relies on **JWTs** for internal user authentication and **HMAC signature validation** for securing incoming Shopify webhooks.
-* **Data Structure**: The local database schema is assumed to be a normalized copy of the most critical Shopify data fields necessary for insight generation (Tenant, Customer, Order, Product).
+* **Data Structure**: The local database schema is a normalized copy of the most critical Shopify data fields necessary for insight generation (Tenant, Customer, Order, Product).
 * **Data Sync**: It is assumed that a **full manual sync** will be performed periodically to correct data discrepancies, given the limited webhook support.
 
 ### APIs and data models used.
@@ -77,13 +95,6 @@ The database uses **MySQL** with **Prisma** as the ORM.
 | **Customer** | Local copy of Shopify Customers. | `shopifyCustomerId` (unique), `email`, `totalSpent` (Float), `ordersCount` (Int) |
 | **Order** | Local copy of Shopify Orders. | `shopifyOrderId` (unique), `totalPrice` (Float), `currency`, `createdAt` |
 
-### Next steps to productionize your solution.
-
-1.  **Implement Data Sync Pagination**: Modify the manual sync endpoints (`/api/data/sync`) to use **cursor-based pagination** for reliable handling of large Shopify data volumes.
-2.  **Expand Webhook Support**: Implement handling for updates and deletions for Products, Customers, and Orders to keep local data fresh without reliance on manual syncs.
-3.  **Resolve API Versioning**: Standardize on a single, current, and supported Shopify API version across the entire application to eliminate the inconsistency between sync (`2025-01`) and webhooks (`2026-01`).
-4.  **Remove Stats Order Limit**: Eliminate the latest **50 orders** limit in the `/api/data/stats` endpoint to ensure accurate analytics and chart data for high-volume stores.
-
 ## API Endpoints and DB Schema
 
 ### Key API Endpoints (Express Server)
@@ -98,11 +109,10 @@ The database uses **MySQL** with **Prisma** as the ORM.
 | `GET` | `/api/data/stats` | Fetches aggregated insights (Sales, AOV, Product/Customer Count, Chart Data). Supports `startDate`/`endDate` query params. | JWT | `dataRoutes.js` |
 | `POST` | `/api/webhooks/orders/create` | Receives and validates new **Order** webhooks. Updates the database and broadcasts via Pusher. | HMAC Signature | `webhookRoutes.js` |
 
+
 ## Known Limitations or Assumptions
 
 * **API Version Inconsistency**: The manual data sync (`/api/data/sync`) is currently hardcoded to use the Shopify API version `2025-01`. However, the `shopify.app.toml` defines the webhook API version as `2026-01`.
 * **Data Sync Pagination**: The manual sync does not implement cursor-based pagination for fetching Shopify data (Products, Orders, Customers). For stores with large volumes of data, this process may time out or fail.
 * **Limited Webhook Support**: Only the `orders/create` webhook is implemented. Updates or deletions for Products, Customers, and Orders are not handled, meaning local data for those entities can become stale until a manual full sync is performed.
 * **Stats Order Limit**: The `/api/data/stats` endpoint only retrieves the latest **50 orders** for calculating `dailyStats` and generating chart data. This may lead to inaccurate daily/chart data if a store receives more than 50 orders within the analyzed date range.
-
-
