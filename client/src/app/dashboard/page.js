@@ -292,6 +292,57 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* NEW SECTION: Order History Table */}
+          <div className={`${bentoCard} md:col-span-4`}>
+             <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">Recent Order History</h3>
+                <span className="text-gray-400 text-sm">Last 50 orders</span>
+             </div>
+             
+             <div className="overflow-x-auto">
+               <table className="w-full text-left border-collapse">
+                 <thead>
+                   <tr className="text-gray-400 text-sm border-b border-gray-100">
+                     <th className="py-4 font-medium pl-2">Order ID</th>
+                     <th className="py-4 font-medium">Date</th>
+                     <th className="py-4 font-medium">Status</th>
+                     <th className="py-4 font-medium text-right pr-2">Total</th>
+                   </tr>
+                 </thead>
+                 <tbody className="text-sm">
+                   {data.orders && data.orders.length > 0 ? (
+                     data.orders.map((order, index) => (
+                       <tr key={index} className="group border-b border-gray-50 last:border-none hover:bg-gray-50 transition-colors">
+                         <td className="py-4 pl-2 font-bold text-black">
+                           #{order.shopifyOrderId}
+                         </td>
+                         <td className="py-4 text-gray-500">
+                           {new Date(order.createdAt).toLocaleDateString('en-US', {
+                             month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                           })}
+                         </td>
+                         <td className="py-4">
+                           <span className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                             Synced
+                           </span>
+                         </td>
+                         <td className="py-4 text-right pr-2 font-bold text-black group-hover:text-[#F04D28] transition-colors">
+                           {order.currency} {order.totalPrice.toFixed(2)}
+                         </td>
+                       </tr>
+                     ))
+                   ) : (
+                     <tr>
+                       <td colSpan="4" className="py-8 text-center text-gray-400">
+                         No recent orders found.
+                       </td>
+                     </tr>
+                   )}
+                 </tbody>
+               </table>
+             </div>
+          </div>
+
         </div>
       )}
 
