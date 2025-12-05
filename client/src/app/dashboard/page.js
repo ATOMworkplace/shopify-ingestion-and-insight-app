@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';  
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import Pusher from 'pusher-js'; 
@@ -7,7 +7,7 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer 
 } from 'recharts';
 
-export default function Dashboard() {
+function DashboardContent() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -374,5 +374,17 @@ export default function Dashboard() {
       )}
 
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
+        <div className="text-gray-400 font-medium animate-pulse text-lg tracking-tight">Loading Dashboard...</div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
