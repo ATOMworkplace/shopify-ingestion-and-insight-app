@@ -16,6 +16,12 @@ The application follows a **microservice/monorepo pattern** with a separation of
     * **Data Persistence**: Uses **Prisma** to manage the **MySQL** database.
     * **Real-time**: Uses **Pusher** to broadcast webhook events to connected clients.
 
+## Demo and Screenshots:
+<img width="1919" height="931" alt="image" src="https://github.com/user-attachments/assets/5d90954e-0b6f-4045-bed3-c87baf851304" />
+<img width="1919" height="961" alt="image" src="https://github.com/user-attachments/assets/332786db-0dcf-4d74-8b72-a6943e9ef5ce" />
+<img width="1899" height="948" alt="image" src="https://github.com/user-attachments/assets/b44badb4-a85f-4e6d-8bd5-9abbf6ad673d" />
+<img width="1885" height="951" alt="image" src="https://github.com/user-attachments/assets/2d305cad-930a-4505-9225-afc26f2ea02f" />
+
 ## Setup Instructions
 
 ### 1. Prerequisites
@@ -98,3 +104,5 @@ The database uses **MySQL** with **Prisma** as the ORM.
 * **Data Sync Pagination**: The manual sync does not implement cursor-based pagination for fetching Shopify data (Products, Orders, Customers). For stores with large volumes of data, this process may time out or fail.
 * **Limited Webhook Support**: Only the `orders/create` webhook is implemented. Updates or deletions for Products, Customers, and Orders are not handled, meaning local data for those entities can become stale until a manual full sync is performed.
 * **Stats Order Limit**: The `/api/data/stats` endpoint only retrieves the latest **50 orders** for calculating `dailyStats` and generating chart data. This may lead to inaccurate daily/chart data if a store receives more than 50 orders within the analyzed date range.
+
+
