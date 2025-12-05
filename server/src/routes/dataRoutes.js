@@ -122,8 +122,6 @@ router.get('/stats', authenticateToken, async (req, res) => {
 
         const avgOrderValue = ordCount > 0 ? (totalSales / ordCount) : 0;
         const revPerCustomer = custCount > 0 ? (totalSales / custCount) : 0;
-
-        // Fetch full order history for the table (limited to 50 for performance)
         const allOrders = await prisma.order.findMany({
             where: orderWhere,
             orderBy: { createdAt: 'desc' },
@@ -167,7 +165,7 @@ router.get('/stats', authenticateToken, async (req, res) => {
                 avgOrderValue,
                 revPerCustomer
             },
-            orders: allOrders, // Sending raw orders to frontend
+            orders: allOrders, 
             chartData,
             topCustomers,
             isConnected: !!tenant?.accessToken,

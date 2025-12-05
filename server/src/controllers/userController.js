@@ -4,7 +4,6 @@ const prisma = require('../config/db');
 const { JWT_SECRET } = require('../utils/auth');
 
 const register = async (req, res) => {
-    //console.log('[DEBUG] userController.register called');
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
     try {
@@ -12,7 +11,6 @@ const register = async (req, res) => {
         const tenant = await prisma.tenant.create({
             data: { email, password: hashedPassword }
         });
-        //console.log('[DEBUG] User created:', tenant.id);
         res.json({ message: 'User registered successfully', userId: tenant.id });
     } catch (error) {
         console.error('[DEBUG] Register error:', error);
@@ -22,7 +20,6 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-    //console.log('[DEBUG] userController.login called');
     const { email, password } = req.body;
     try {
         const tenant = await prisma.tenant.findUnique({ where: { email } });
@@ -36,7 +33,6 @@ const login = async (req, res) => {
             JWT_SECRET, 
             { expiresIn: '24h' }
         );
-        //console.log('[DEBUG] Login success, token generated');
         res.json({ 
             token, 
             user: { id: tenant.id, email: tenant.email, shopDomain: tenant.shopDomain } 

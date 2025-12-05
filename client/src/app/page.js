@@ -31,15 +31,12 @@ export default function Login() {
     }
   };
 
-  // Styles matching the Dashboard (Light mode, heavy rounded corners)
   const inputStyle = "w-full bg-gray-50 text-[#1D1D1D] placeholder-gray-400 text-lg px-6 py-4 rounded-2xl border-none focus:outline-none focus:ring-2 focus:ring-[#FF6B4A] transition-all";
 
   return (
     <div className="min-h-screen bg-[#F2F4F7] flex items-center justify-center p-6 font-sans">
       
       <div className="bg-white p-10 md:p-12 rounded-[2.5rem] shadow-sm w-full max-w-md flex flex-col items-center text-center">
-        
-        {/* Minimal Brand Identifier */}
         <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-8">
            <span className="text-white text-2xl font-bold">X</span>
         </div>
