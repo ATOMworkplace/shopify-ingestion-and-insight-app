@@ -1,4 +1,4 @@
-# Shopify Ingestion and Insight App Documentation
+# Shopify Ingestion and Insight App
 
 This application is a **Shopify Ingestion and Insight App** designed to synchronize customer, order, and product data from a connected Shopify store to a local database and provide key e-commerce insights.
 
