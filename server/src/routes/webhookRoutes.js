@@ -27,7 +27,7 @@ const rawBodyMiddleware = async (req, res, next) => {
 router.post('/orders/create', rawBodyMiddleware, async (req, res) => {
   try {
     const hmac = req.get('X-Shopify-Hmac-Sha256');
-    const secret = process.env.SHOPIFY_WEBHOOK_SECRET; 
+    const secret = process.env.SHOPIFY_API_SECRET; 
 
     const hash = crypto
       .createHmac('sha256', secret)
@@ -41,11 +41,9 @@ router.post('/orders/create', rawBodyMiddleware, async (req, res) => {
     const orderData = JSON.parse(req.rawBody.toString());
     const shopDomain = req.get('X-Shopify-Shop-Domain');
 
-    // 1. Find the Tenant
     const tenant = await prisma.tenant.findUnique({ where: { shopDomain } });
     if (!tenant) return res.status(404).send('Tenant not found');
 
-    // 2. Sync the Order
     await prisma.order.upsert({
       where: { shopifyOrderId: String(orderData.id) },
       update: {
@@ -61,37 +59,33 @@ router.post('/orders/create', rawBodyMiddleware, async (req, res) => {
       }
     });
 
-    // 3. Sync the Customer (THIS WAS MISSING)
-    // Shopify sends the updated customer stats inside the order payload
     if (orderData.customer) {
         await prisma.customer.upsert({
             where: { shopifyCustomerId: String(orderData.customer.id) },
             update: {
-                totalSpent: parseFloat(orderData.customer.total_spent || 0),
-                ordersCount: orderData.customer.orders_count || 0, // Updates the count!
+                totalSpent: { increment: parseFloat(orderData.total_price) },
+                ordersCount: { increment: 1 },
                 email: orderData.customer.email
             },
             create: {
                 shopifyCustomerId: String(orderData.customer.id),
                 email: orderData.customer.email,
-                totalSpent: parseFloat(orderData.customer.total_spent || 0),
-                ordersCount: orderData.customer.orders_count || 1,
+                totalSpent: parseFloat(orderData.total_price),
+                ordersCount: 1,
                 tenantId: tenant.id
             }
         });
     }
 
-    // 4. Trigger Frontend Update
     await pusher.trigger('shop-updates', 'order-synced', {
       message: 'New order received',
       orderId: orderData.id
     });
 
-    console.log(`✅ Order & Customer synced for ${shopDomain}`);
     res.status(200).send('Webhook processed');
 
   } catch (error) {
-    console.error('Webhook Error:', error);
+    console.error(error);
     res.status(200).send('Error processed'); 
   }
 });

@@ -105,6 +105,20 @@ export default function Dashboard() {
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/shopify/install?shop=${cleanShop}&token=${token}`;
   };
 
+  const handleDisconnect = async () => {
+    if(!confirm("Are you sure you want to disconnect this store?")) return;
+    
+    try {
+      setLoading(true);
+      await api.post('/shopify/disconnect');
+      showToast('Store disconnected', 'success');
+      window.location.reload(); 
+    } catch (err) {
+      showToast('Disconnect failed', 'error');
+      setLoading(false);
+    }
+  };
+
   const bentoCard = "bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow duration-300";
 
   if (loading && !data) return (
@@ -145,10 +159,17 @@ export default function Dashboard() {
             <button 
               onClick={handleSync} 
               disabled={syncing}
-              className="bg-[#F04D28] hover:bg-[#D63E1C] text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg shadow-orange-500/20 transition-all flex items-center"
+              className="bg-[#F04D28] hover:bg-[#D63E1C] text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-orange-500/20 transition-all flex items-center"
             >
-              {syncing ? 'Syncing...' : 'Sync Data'}
+              {syncing ? 'Syncing...' : 'Sync'}
               <span className="ml-2 text-lg">→</span>
+            </button>
+            
+            <button 
+              onClick={handleDisconnect}
+              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-full text-sm font-bold transition-all"
+            >
+              Disconnect
             </button>
             
             <button 
@@ -292,7 +313,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* NEW SECTION: Order History Table */}
           <div className={`${bentoCard} md:col-span-4`}>
              <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-bold">Recent Order History</h3>

@@ -1,7 +1,29 @@
 const axios = require('axios');
 const prisma = require('../config/db');
-const { SHOPIFY_API_KEY, SHOPIFY_API_SECRET, APP_URL, REDIRECT_URI } = process.env;
+const { SHOPIFY_API_KEY, SHOPIFY_API_SECRET, APP_URL, REDIRECT_URI, FRONTEND_URL } = process.env;
 const SCOPES = 'read_products,read_orders,read_customers';
+
+async function registerWebhooks(shop, accessToken) {
+    const webhookUrl = `${APP_URL}/api/webhooks/orders/create`;
+    const headers = {
+        'X-Shopify-Access-Token': accessToken,
+        'Content-Type': 'application/json'
+    };
+
+    try {
+        await axios.post(`https://${shop}/admin/api/2025-01/webhooks.json`, {
+            webhook: {
+                topic: 'orders/create',
+                address: webhookUrl,
+                format: 'json'
+            }
+        }, { headers });
+    } catch (error) {
+        if (!error.response?.data?.errors?.address?.includes('taken')) {
+            console.error(error);
+        }
+    }
+}
 
 const install = (req, res) => {
     if (!req.user || !req.user.id) {
@@ -9,13 +31,7 @@ const install = (req, res) => {
     }
 
     const shop = req.query.shop;
-    if (!shop) {
-        return res.status(400).send('Missing shop parameter');
-    }
-
-    if (!shop.includes('.myshopify.com')) {
-        return res.status(400).send('Invalid shop domain. Must be in format: storename.myshopify.com');
-    }
+    if (!shop) return res.status(400).send('Missing shop parameter');
 
     const state = req.user.id;
     const redirectUri = REDIRECT_URI || `${APP_URL}/api/shopify/callback`;
@@ -27,13 +43,8 @@ const install = (req, res) => {
 const callback = async (req, res) => {
     const { shop, code, state, error } = req.query;
     
-    if (error) {
-        return res.redirect(`${process.env.FRONTEND_URL}/dashboard?error=${encodeURIComponent(error)}`);
-    }
-    
-    if (!shop || !code || !state) {
-        return res.status(400).send('Missing shop, code, or state');
-    }
+    if (error) return res.redirect(`${FRONTEND_URL}/dashboard?error=${encodeURIComponent(error)}`);
+    if (!shop || !code || !state) return res.status(400).send('Missing parameters');
 
     try {
         const tokenResponse = await axios.post(`https://${shop}/admin/oauth/access_token`, {
@@ -53,71 +64,30 @@ const callback = async (req, res) => {
             }
         });
 
-        try {
-            await syncShopifyData(state, shop, access_token);
-            res.redirect(`${process.env.FRONTEND_URL}/dashboard?connected=true&synced=true`);
-        } catch (syncError) {
-            console.error(syncError);
-            res.redirect(`${process.env.FRONTEND_URL}/dashboard?connected=true&syncError=true`);
-        }
+        await registerWebhooks(shop, access_token);
+
+        res.redirect(`${FRONTEND_URL}/dashboard?connected=true&synced=true`);
     } catch (error) {
-        res.redirect(`${process.env.FRONTEND_URL}/dashboard?error=auth_failed`);
+        console.error(error);
+        res.redirect(`${FRONTEND_URL}/dashboard?error=auth_failed`);
     }
 };
 
-async function syncShopifyData(tenantId, shopDomain, accessToken) {
-    const headers = {
-        'X-Shopify-Access-Token': accessToken,
-        'Content-Type': 'application/json'
-    };
-    const baseUrl = `https://${shopDomain}/admin/api/2025-01`;
-
-    const prodRes = await axios.get(`${baseUrl}/products.json`, { headers });
-    for (const p of prodRes.data.products) {
-        await prisma.product.upsert({
-            where: { shopifyProductId: p.id.toString() },
-            update: { title: p.title },
-            create: {
-                shopifyProductId: p.id.toString(),
-                title: p.title,
-                tenantId: tenantId
+const disconnect = async (req, res) => {
+    const tenantId = req.user.id;
+    try {
+        await prisma.tenant.update({
+            where: { id: tenantId },
+            data: { 
+                shopDomain: null, 
+                accessToken: null,
+                installedAt: null
             }
         });
+        res.json({ success: true, message: 'Store disconnected' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to disconnect' });
     }
+};
 
-    const ordRes = await axios.get(`${baseUrl}/orders.json?status=any`, { headers });
-    for (const o of ordRes.data.orders) {
-        await prisma.order.upsert({
-            where: { shopifyOrderId: o.id.toString() },
-            update: { totalPrice: parseFloat(o.total_price) },
-            create: {
-                shopifyOrderId: o.id.toString(),
-                totalPrice: parseFloat(o.total_price),
-                currency: o.currency,
-                createdAt: new Date(o.created_at),
-                tenantId: tenantId
-            }
-        });
-    }
-
-    // UPDATED: Sync orders_count
-    const custRes = await axios.get(`${baseUrl}/customers.json`, { headers });
-    for (const c of custRes.data.customers) {
-        await prisma.customer.upsert({
-            where: { shopifyCustomerId: c.id.toString() },
-            update: { 
-                totalSpent: parseFloat(c.total_spent || 0),
-                ordersCount: c.orders_count || 0
-            },
-            create: {
-                shopifyCustomerId: c.id.toString(),
-                email: c.email,
-                totalSpent: parseFloat(c.total_spent || 0),
-                ordersCount: c.orders_count || 0,
-                tenantId: tenantId
-            }
-        });
-    }
-}
-
-module.exports = { install, callback };
+module.exports = { install, callback, disconnect };
