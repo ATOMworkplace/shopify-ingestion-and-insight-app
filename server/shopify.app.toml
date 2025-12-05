@@ -2,8 +2,8 @@
 
 client_id = "424bfcd193589e3e1fc344cd38a4a448"
 name = "Ingestion-Insights-Service"
-application_url = "https://17357b79ae97.ngrok-free.app"
-embedded = true
+application_url = "https://shopify-ingestion-and-insight-app-i.vercel.app"
+embedded = false
 
 [webhooks]
 api_version = "2026-01"
@@ -15,4 +15,6 @@ optional_scopes = [ ]
 use_legacy_install_flow = true
 
 [auth]
-redirect_urls = [ "https://17357b79ae97.ngrok-free.app/api/shopify/callback" ]
+redirect_urls = [
+  "https://shopify-ingestion-and-insight-app-i.vercel.app/api/shopify/callback"
+]

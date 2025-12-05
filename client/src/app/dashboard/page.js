@@ -130,89 +130,99 @@ function DashboardContent() {
     }
   };
 
-  const bentoCard = "bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow duration-300";
+  const bentoCard = "bg-white rounded-xl sm:rounded-2xl p-5 sm:p-8 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow duration-300";
 
   if (loading && !data) return (
     <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
-      <div className="text-gray-400 font-medium animate-pulse text-lg tracking-tight">Loading Dashboard...</div>
+      <div className="text-gray-400 font-medium animate-pulse text-base sm:text-lg tracking-tight">Loading Dashboard...</div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6] text-[#111111] font-sans p-6 md:p-10">
+    <div className="min-h-screen bg-[#F3F4F6] text-[#111111] font-sans p-4 sm:p-6 md:p-10">
       
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-10 gap-4 sm:gap-6">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-black mb-1">Financial Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-black mb-1">Financial Dashboard</h1>
           {data?.isConnected && (
-            <p className="text-gray-400 text-sm font-medium">{data.shopDomain}</p>
+            <p className="text-gray-400 text-xs sm:text-sm font-medium">{data.shopDomain}</p>
           )}
         </div>
 
         {data?.isConnected && (
-          <div className="flex items-center gap-4">
-            <div className="flex items-center bg-white rounded-full px-2 py-2 shadow-sm border border-gray-100">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+            <div className="flex items-center bg-white rounded-full px-2 py-2 shadow-sm border border-gray-100 overflow-x-auto">
               <input 
                 type="date" 
-                className="bg-transparent text-gray-600 text-sm font-medium border-none focus:outline-none px-2"
+                className="bg-transparent text-gray-600 text-xs sm:text-sm font-medium border-none focus:outline-none px-1 sm:px-2 min-w-0"
                 value={dateRange.start} 
                 onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))} 
               />
-              <span className="text-gray-300 text-xs mx-1">to</span>
+              <span className="text-gray-300 text-xs mx-1 flex-shrink-0">to</span>
               <input 
                 type="date" 
-                className="bg-transparent text-gray-600 text-sm font-medium border-none focus:outline-none px-2"
+                className="bg-transparent text-gray-600 text-xs sm:text-sm font-medium border-none focus:outline-none px-1 sm:px-2 min-w-0"
                 value={dateRange.end} 
                 onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))} 
               />
             </div>
 
-            <button 
-              onClick={handleSync} 
-              disabled={syncing}
-              className="bg-[#F04D28] hover:bg-[#D63E1C] text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-orange-500/20 transition-all flex items-center"
-            >
-              {syncing ? 'Syncing...' : 'Sync'}
-              <span className="ml-2 text-lg">→</span>
-            </button>
-            
-            <button 
-              onClick={handleDisconnect}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-full text-sm font-bold transition-all"
-            >
-              Disconnect
-            </button>
-            
-            <button 
-               onClick={() => { localStorage.clear(); router.push('/'); }} 
-               className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
-               title="Logout"
-            >
-              ✕
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handleSync} 
+                disabled={syncing}
+                className="bg-[#F04D28] hover:bg-[#D63E1C] text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bold shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center flex-1 sm:flex-initial"
+              >
+                {syncing ? 'Syncing...' : 'Sync'}
+                <span className="ml-2 text-base sm:text-lg">→</span>
+              </button>
+              
+              <button 
+                onClick={handleDisconnect}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-bold transition-all hidden sm:block"
+              >
+                Disconnect
+              </button>
+              
+              <button 
+                onClick={handleDisconnect}
+                className="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-700 transition-colors sm:hidden flex-shrink-0"
+                title="Disconnect"
+              >
+                ✕
+              </button>
+              
+              <button 
+                 onClick={() => { localStorage.clear(); router.push('/'); }} 
+                 className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors flex-shrink-0"
+                 title="Logout"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         )}
       </div>
 
       {!data?.isConnected ? (
-        <div className="max-w-xl mx-auto mt-20">
-          <div className={`${bentoCard} text-center py-16`}>
-            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-3xl">🛍️</span>
+        <div className="max-w-xl mx-auto mt-10 sm:mt-20">
+          <div className={`${bentoCard} text-center py-12 sm:py-16`}>
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <span className="text-2xl sm:text-3xl">🛍️</span>
             </div>
-            <h2 className="text-3xl font-bold mb-4">Connect Store</h2>
-            <p className="text-gray-400 mb-8 max-w-sm mx-auto leading-relaxed">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Connect Store</h2>
+            <p className="text-gray-400 mb-6 sm:mb-8 max-w-sm mx-auto leading-relaxed text-sm sm:text-base px-4">
               Enter your Shopify domain to visualize your financial data.
             </p>
-            <div className="flex flex-col gap-4 max-w-sm mx-auto w-full">
+            <div className="flex flex-col gap-3 sm:gap-4 max-w-sm mx-auto w-full px-4">
               <input 
                 type="text" placeholder="store.myshopify.com" 
-                className="bg-gray-50 text-black text-lg p-4 rounded-2xl border-none focus:ring-2 focus:ring-orange-100 focus:outline-none w-full text-center placeholder:text-gray-300"
+                className="bg-gray-50 text-black text-base sm:text-lg p-3 sm:p-4 rounded-xl sm:rounded-2xl border-none focus:ring-2 focus:ring-orange-100 focus:outline-none w-full text-center placeholder:text-gray-300"
                 value={shopUrl} onChange={(e) => setShopUrl(e.target.value)}
               />
               <button 
                 onClick={handleConnect} 
-                className="bg-black text-white py-4 rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all w-full"
+                className="bg-black text-white py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:bg-gray-800 transition-all w-full"
               >
                 Connect Now
               </button>
@@ -220,49 +230,49 @@ function DashboardContent() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[minmax(180px,auto)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 auto-rows-[minmax(180px,auto)]">
           
-          <div className={`${bentoCard} md:col-span-2 relative overflow-hidden`}>
+          <div className={`${bentoCard} sm:col-span-2 relative overflow-hidden`}>
             <div className="flex justify-between items-start z-10">
-              <span className="text-gray-400 font-medium text-sm">Total Revenue</span>
-              <span className="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold">+12%</span>
+              <span className="text-gray-400 font-medium text-xs sm:text-sm">Total Revenue</span>
+              <span className="bg-green-50 text-green-600 px-2 sm:px-3 py-1 rounded-full text-xs font-bold">+12%</span>
             </div>
-            <div className="mt-4 z-10">
-              <h3 className="text-5xl font-bold tracking-tight text-black">
+            <div className="mt-3 sm:mt-4 z-10">
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-black">
                 ${(data.stats?.totalSales || 0).toLocaleString()}
               </h3>
             </div>
-            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-orange-50 rounded-full opacity-50 z-0 pointer-events-none"></div>
+            <div className="absolute -right-10 -bottom-10 w-32 h-32 sm:w-40 sm:h-40 bg-orange-50 rounded-full opacity-50 z-0 pointer-events-none"></div>
           </div>
 
           <div className={bentoCard}>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-400 font-medium text-sm">Total Orders</span>
+              <span className="text-gray-400 font-medium text-xs sm:text-sm">Total Orders</span>
               <div className="w-2 h-2 rounded-full bg-black"></div>
             </div>
-            <h3 className="text-4xl font-bold text-black mt-auto">
+            <h3 className="text-3xl sm:text-4xl font-bold text-black mt-auto">
               {data.stats?.orderCount || 0}
             </h3>
           </div>
 
           <div className={bentoCard}>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-400 font-medium text-sm">Avg. Order</span>
+              <span className="text-gray-400 font-medium text-xs sm:text-sm">Avg. Order</span>
               <div className="w-2 h-2 rounded-full bg-orange-500"></div>
             </div>
-            <h3 className="text-4xl font-bold text-black mt-auto">
+            <h3 className="text-3xl sm:text-4xl font-bold text-black mt-auto">
               ${(data.stats?.avgOrderValue || 0).toFixed(0)}
             </h3>
           </div>
 
-          <div className={`${bentoCard} md:col-span-2 md:row-span-2`}>
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-xl font-bold">Sales Activity</h3>
-              <select className="bg-gray-50 border-none rounded-lg text-xs font-bold px-3 py-2 text-gray-500 cursor-pointer focus:outline-none">
+          <div className={`${bentoCard} sm:col-span-2 md:row-span-2`}>
+            <div className="flex justify-between items-center mb-6 sm:mb-8">
+              <h3 className="text-lg sm:text-xl font-bold">Sales Activity</h3>
+              <select className="bg-gray-50 border-none rounded-lg text-xs font-bold px-2 sm:px-3 py-1.5 sm:py-2 text-gray-500 cursor-pointer focus:outline-none">
                 <option>2025</option>
               </select>
             </div>
-            <div className="h-[250px] w-full mt-auto">
+            <div className="h-[200px] sm:h-[250px] w-full mt-auto">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data.chartData || []}>
                   <defs>
@@ -274,31 +284,31 @@ function DashboardContent() {
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#fff', border: 'none', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   />
-                  <Area type="monotone" dataKey="sales" stroke="#F04D28" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" />
+                  <Area type="monotone" dataKey="sales" stroke="#F04D28" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div className={`${bentoCard} md:col-span-2 md:row-span-2`}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">Top Customers</h3>
+          <div className={`${bentoCard} sm:col-span-2 md:row-span-2`}>
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-bold">Top Customers</h3>
               <button className="text-gray-400 hover:text-black text-xl">•••</button>
             </div>
             
-            <div className="flex flex-col gap-4 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+            <div className="flex flex-col gap-3 sm:gap-4 overflow-y-auto max-h-[250px] sm:max-h-[300px] pr-2 custom-scrollbar">
               {data.topCustomers?.length > 0 ? data.topCustomers.map((c, i) => (
                 <div key={i} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-600 group-hover:bg-black group-hover:text-white transition-colors">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-100 flex items-center justify-center text-xs sm:text-sm font-bold text-gray-600 group-hover:bg-black group-hover:text-white transition-colors flex-shrink-0">
                       {c.email?.[0]?.toUpperCase() || 'U'}
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-black">{c.email?.split('@')[0]}</p>
+                    <div className="min-w-0">
+                      <p className="font-bold text-xs sm:text-sm text-black truncate">{c.email?.split('@')[0]}</p>
                       <p className="text-xs text-gray-400">{c.ordersCount || 0} Orders</p>
                     </div>
                   </div>
-                  <span className="font-bold text-sm text-black group-hover:text-[#F04D28] transition-colors">
+                  <span className="font-bold text-xs sm:text-sm text-black group-hover:text-[#F04D28] transition-colors ml-2 flex-shrink-0">
                     ${(c.totalSpent || 0).toFixed(2)}
                   </span>
                 </div>
@@ -308,56 +318,56 @@ function DashboardContent() {
             </div>
           </div>
 
-          <div className={`${bentoCard} md:col-span-2`}>
-             <div className="flex justify-between items-center mb-4">
-              <span className="text-gray-400 font-medium text-sm">Order Volume</span>
+          <div className={`${bentoCard} sm:col-span-2`}>
+             <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <span className="text-gray-400 font-medium text-xs sm:text-sm">Order Volume</span>
             </div>
-            <div className="h-[100px] w-full">
+            <div className="h-[80px] sm:h-[100px] w-full">
                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.chartData || []}>
                     <XAxis dataKey="date" hide />
                     <YAxis hide domain={[0, 'dataMax + 5']} />
                     <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
-                    <Bar dataKey="orders" fill="#111111" radius={[4, 4, 4, 4]} barSize={20} />
+                    <Bar dataKey="orders" fill="#111111" radius={[4, 4, 4, 4]} barSize={16} />
                   </BarChart>
                 </ResponsiveContainer>
             </div>
           </div>
 
-          <div className={`${bentoCard} md:col-span-4`}>
-             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold">Recent Order History</h3>
-                <span className="text-gray-400 text-sm">Last 50 orders</span>
+          <div className={`${bentoCard} sm:col-span-2 md:col-span-4`}>
+             <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-bold">Recent Order History</h3>
+                <span className="text-gray-400 text-xs sm:text-sm">Last 50 orders</span>
              </div>
              
-             <div className="overflow-x-auto">
-               <table className="w-full text-left border-collapse">
+             <div className="overflow-x-auto -mx-5 sm:mx-0 px-5 sm:px-0">
+               <table className="w-full text-left border-collapse min-w-[600px]">
                  <thead>
-                   <tr className="text-gray-400 text-sm border-b border-gray-100">
-                     <th className="py-4 font-medium pl-2">Order ID</th>
-                     <th className="py-4 font-medium">Date</th>
-                     <th className="py-4 font-medium">Status</th>
-                     <th className="py-4 font-medium text-right pr-2">Total</th>
+                   <tr className="text-gray-400 text-xs sm:text-sm border-b border-gray-100">
+                     <th className="py-3 sm:py-4 font-medium pl-2">Order ID</th>
+                     <th className="py-3 sm:py-4 font-medium">Date</th>
+                     <th className="py-3 sm:py-4 font-medium">Status</th>
+                     <th className="py-3 sm:py-4 font-medium text-right pr-2">Total</th>
                    </tr>
                  </thead>
-                 <tbody className="text-sm">
+                 <tbody className="text-xs sm:text-sm">
                    {data.orders && data.orders.length > 0 ? (
                      data.orders.map((order, index) => (
                        <tr key={index} className="group border-b border-gray-50 last:border-none hover:bg-gray-50 transition-colors">
-                         <td className="py-4 pl-2 font-bold text-black">
+                         <td className="py-3 sm:py-4 pl-2 font-bold text-black">
                            #{order.shopifyOrderId}
                          </td>
-                         <td className="py-4 text-gray-500">
+                         <td className="py-3 sm:py-4 text-gray-500">
                            {new Date(order.createdAt).toLocaleDateString('en-US', {
                              month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
                            })}
                          </td>
-                         <td className="py-4">
-                           <span className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                         <td className="py-3 sm:py-4">
+                           <span className="bg-green-50 text-green-700 px-2 sm:px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
                              Synced
                            </span>
                          </td>
-                         <td className="py-4 text-right pr-2 font-bold text-black group-hover:text-[#F04D28] transition-colors">
+                         <td className="py-3 sm:py-4 text-right pr-2 font-bold text-black group-hover:text-[#F04D28] transition-colors">
                            {order.currency} {order.totalPrice.toFixed(2)}
                          </td>
                        </tr>
@@ -378,9 +388,9 @@ function DashboardContent() {
       )}
 
       {toast && (
-        <div className={`fixed bottom-8 right-8 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-up z-50 ${toast.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-black text-white'}`}>
-          <div className={`w-2 h-2 rounded-full ${toast.type === 'error' ? 'bg-red-500' : 'bg-[#F04D28]'}`}></div>
-          <span className="font-medium text-sm">{toast.message}</span>
+        <div className={`fixed bottom-4 sm:bottom-8 right-4 sm:right-8 left-4 sm:left-auto px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-2xl flex items-center gap-2 sm:gap-3 animate-slide-up z-50 ${toast.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-black text-white'}`}>
+          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${toast.type === 'error' ? 'bg-red-500' : 'bg-[#F04D28]'}`}></div>
+          <span className="font-medium text-xs sm:text-sm">{toast.message}</span>
         </div>
       )}
 
@@ -392,7 +402,7 @@ export default function Dashboard() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
-        <div className="text-gray-400 font-medium animate-pulse text-lg tracking-tight">Loading Dashboard...</div>
+        <div className="text-gray-400 font-medium animate-pulse text-base sm:text-lg tracking-tight">Loading Dashboard...</div>
       </div>
     }>
       <DashboardContent />
